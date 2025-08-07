@@ -21,6 +21,14 @@ type Options struct {
 	UpdateHandler    telegram.UpdateHandler
 }
 
+func SetApp(kv storage.Storage, name string, app App) error {
+	Apps[name] = app
+	if err := kv.Set(context.TODO(), key.App(), []byte(name)); err != nil {
+		return errors.Wrap(err, "set app")
+	}
+	return nil
+}
+
 func GetApp(kv storage.Storage) (App, error) {
 	mode, err := kv.Get(context.TODO(), key.App())
 	if err != nil {

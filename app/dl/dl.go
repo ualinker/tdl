@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
 	"github.com/go-faster/errors"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/peers"
-	"github.com/spf13/viper"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
@@ -19,7 +19,6 @@ import (
 	"github.com/iyear/tdl/core/logctx"
 	"github.com/iyear/tdl/core/storage"
 	"github.com/iyear/tdl/core/tclient"
-	"github.com/iyear/tdl/pkg/consts"
 	"github.com/iyear/tdl/pkg/key"
 	"github.com/iyear/tdl/pkg/prog"
 	"github.com/iyear/tdl/pkg/tmessage"
@@ -33,6 +32,7 @@ type Options struct {
 	Template   string
 	URLs       []string
 	Files      []string
+	Dialogs    []*tmessage.Dialog
 	Include    []string
 	Exclude    []string
 	Desc       bool
@@ -52,22 +52,38 @@ type parser struct {
 	Parser tmessage.ParseSource
 }
 
+const (
+	FlagPoolSize         = 8
+	FlagReconnectTimeout = 5 * time.Minute
+	FlagDelay            = 0
+	FlagThreads          = 4
+	FlagLimit            = 2
+)
+
 func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Options) (rerr error) {
 	pool := dcpool.NewPool(c,
-		int64(viper.GetInt(consts.FlagPoolSize)),
-		tclient.NewDefaultMiddlewares(ctx, viper.GetDuration(consts.FlagReconnectTimeout))...)
+		int64(FlagPoolSize),
+		tclient.NewDefaultMiddlewares(ctx, FlagReconnectTimeout)...)
 	defer multierr.AppendInvoke(&rerr, multierr.Close(pool))
 
-	parsers := []parser{
-		{Data: opts.URLs, Parser: tmessage.FromURL(ctx, pool, kvd, opts.URLs)},
-		{Data: opts.Files, Parser: tmessage.FromFile(ctx, pool, kvd, opts.Files, true)},
+	var dialogs [][]*tmessage.Dialog
+
+	if opts.Dialogs != nil {
+		dialogs = [][]*tmessage.Dialog{opts.Dialogs}
+	} else {
+		parsers := []parser{
+			{Data: opts.URLs, Parser: tmessage.FromURL(ctx, pool, kvd, opts.URLs)},
+			{Data: opts.Files, Parser: tmessage.FromFile(ctx, pool, kvd, opts.Files, true)},
+		}
+
+		var err error
+		dialogs, err = collectDialogs(parsers)
+		if err != nil {
+			return err
+		}
+		logctx.From(ctx).Debug("Collect dialogs",
+			zap.Any("dialogs", dialogs))
 	}
-	dialogs, err := collectDialogs(parsers)
-	if err != nil {
-		return err
-	}
-	logctx.From(ctx).Debug("Collect dialogs",
-		zap.Any("dialogs", dialogs))
 
 	if opts.Serve {
 		return serve(ctx, kvd, pool, dialogs, opts.Port, opts.Takeout)
@@ -75,7 +91,7 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 
 	manager := peers.Options{Storage: storage.NewPeers(kvd)}.Build(pool.Default(ctx))
 
-	it, err := newIter(pool, manager, dialogs, opts, viper.GetDuration(consts.FlagDelay))
+	it, err := newIter(pool, manager, dialogs, opts, FlagDelay)
 	if err != nil {
 		return err
 	}
@@ -103,11 +119,11 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 
 	options := downloader.Options{
 		Pool:     pool,
-		Threads:  viper.GetInt(consts.FlagThreads),
+		Threads:  FlagThreads,
 		Iter:     it,
 		Progress: newProgress(dlProgress, it, opts),
 	}
-	limit := viper.GetInt(consts.FlagLimit)
+	limit := FlagLimit
 
 	logctx.From(ctx).Info("Start download",
 		zap.String("dir", opts.Dir),
