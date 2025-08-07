@@ -18,14 +18,14 @@ import (
 	"github.com/gotd/td/tg"
 	"go.uber.org/atomic"
 
-	"github.com/iyear/tdl/core/dcpool"
-	"github.com/iyear/tdl/core/downloader"
-	"github.com/iyear/tdl/core/tmedia"
-	"github.com/iyear/tdl/core/util/fsutil"
-	"github.com/iyear/tdl/core/util/tutil"
-	"github.com/iyear/tdl/pkg/tmessage"
-	"github.com/iyear/tdl/pkg/tplfunc"
-	"github.com/iyear/tdl/pkg/utils"
+	"github.com/ualinker/tdl/core/dcpool"
+	"github.com/ualinker/tdl/core/downloader"
+	"github.com/ualinker/tdl/core/tmedia"
+	"github.com/ualinker/tdl/core/util/fsutil"
+	"github.com/ualinker/tdl/core/util/tutil"
+	"github.com/ualinker/tdl/pkg/tmessage"
+	"github.com/ualinker/tdl/pkg/tplfunc"
+	"github.com/ualinker/tdl/pkg/utils"
 )
 
 const tempExt = ".tmp"

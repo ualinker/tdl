@@ -6,9 +6,9 @@ import (
 	"github.com/gotd/td/telegram"
 	"github.com/spf13/cobra"
 
-	"github.com/iyear/tdl/app/up"
-	"github.com/iyear/tdl/core/logctx"
-	"github.com/iyear/tdl/core/storage"
+	"github.com/ualinker/tdl/app/up"
+	"github.com/ualinker/tdl/core/logctx"
+	"github.com/ualinker/tdl/core/storage"
 )
 
 func NewUpload() *cobra.Command {

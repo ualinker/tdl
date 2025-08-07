@@ -1,11 +1,11 @@
-module github.com/iyear/tdl/extension
+module github.com/ualinker/tdl/extension
 
 go 1.23.10
 
 require (
 	github.com/go-faster/errors v0.7.1
 	github.com/gotd/td v0.122.0
-	github.com/iyear/tdl/core v0.19.1
+	github.com/ualinker/tdl/core v0.19.1
 	go.uber.org/zap v1.27.0
 )
 

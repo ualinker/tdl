@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/iyear/tdl/app/chat"
+	"github.com/ualinker/tdl/app/chat"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

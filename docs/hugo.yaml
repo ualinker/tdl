@@ -19,7 +19,7 @@ markup:
 
 params:
   BookTheme: auto
-  BookRepo: https://github.com/iyear/tdl
+  BookRepo: https://github.com/ualinker/tdl
   BookSection: "*"
   BookSearch: true # container will be mounted by docsearch
   BookEditPath: edit/master/docs
@@ -35,7 +35,7 @@ languages:
     menu:
       before:
         - name: "🔗 GitHub"
-          url: "https://github.com/iyear/tdl"
+          url: "https://github.com/ualinker/tdl"
           weight: 10
         - name: "👨‍💻 Author"
           url: "https://github.com/iyear"
@@ -50,7 +50,7 @@ languages:
     menu:
       before:
         - name: "🔗 项目主页"
-          url: "https://github.com/iyear/tdl"
+          url: "https://github.com/ualinker/tdl"
           weight: 10
         - name: "👨‍💻 作者"
           url: "https://github.com/iyear"

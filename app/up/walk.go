@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/iyear/tdl/core/util/fsutil"
-	"github.com/iyear/tdl/pkg/consts"
+	"github.com/ualinker/tdl/core/util/fsutil"
+	"github.com/ualinker/tdl/pkg/consts"
 )
 
 func walk(paths, excludes []string) ([]*file, error) {

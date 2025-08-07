@@ -11,10 +11,10 @@ import (
 	"github.com/gotd/td/tg"
 	"github.com/spf13/viper"
 
-	"github.com/iyear/tdl/pkg/consts"
-	"github.com/iyear/tdl/pkg/key"
-	"github.com/iyear/tdl/pkg/kv"
-	"github.com/iyear/tdl/pkg/tclient"
+	"github.com/ualinker/tdl/pkg/consts"
+	"github.com/ualinker/tdl/pkg/key"
+	"github.com/ualinker/tdl/pkg/kv"
+	"github.com/ualinker/tdl/pkg/tclient"
 )
 
 func Code(ctx context.Context) error {

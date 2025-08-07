@@ -9,8 +9,8 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/gotd/td/telegram/peers"
 
-	"github.com/iyear/tdl/core/uploader"
-	"github.com/iyear/tdl/core/util/mediautil"
+	"github.com/ualinker/tdl/core/uploader"
+	"github.com/ualinker/tdl/core/util/mediautil"
 )
 
 type file struct {

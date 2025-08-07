@@ -1,4 +1,4 @@
-module github.com/iyear/tdl/docs
+module github.com/ualinker/tdl/docs
 
 go 1.23.10
 

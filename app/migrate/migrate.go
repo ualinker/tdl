@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/go-faster/errors"
 
-	"github.com/iyear/tdl/pkg/kv"
+	"github.com/ualinker/tdl/pkg/kv"
 )
 
 func Migrate(ctx context.Context, to map[string]string) error {

@@ -13,8 +13,8 @@ import (
 	"github.com/gotd/td/tg"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/iyear/tdl/core/util/fsutil"
-	"github.com/iyear/tdl/core/util/mediautil"
+	"github.com/ualinker/tdl/core/util/fsutil"
+	"github.com/ualinker/tdl/core/util/mediautil"
 )
 
 // MaxPartSize refer to https://core.telegram.org/api/files#uploading-files

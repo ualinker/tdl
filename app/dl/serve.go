@@ -20,13 +20,13 @@ import (
 	"github.com/gotd/td/tg"
 	"github.com/spf13/viper"
 
-	"github.com/iyear/tdl/core/dcpool"
-	"github.com/iyear/tdl/core/logctx"
-	"github.com/iyear/tdl/core/storage"
-	"github.com/iyear/tdl/core/tmedia"
-	"github.com/iyear/tdl/core/util/tutil"
-	"github.com/iyear/tdl/pkg/consts"
-	"github.com/iyear/tdl/pkg/tmessage"
+	"github.com/ualinker/tdl/core/dcpool"
+	"github.com/ualinker/tdl/core/logctx"
+	"github.com/ualinker/tdl/core/storage"
+	"github.com/ualinker/tdl/core/tmedia"
+	"github.com/ualinker/tdl/core/util/tutil"
+	"github.com/ualinker/tdl/pkg/consts"
+	"github.com/ualinker/tdl/pkg/tmessage"
 )
 
 type media struct {

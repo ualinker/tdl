@@ -17,11 +17,11 @@ import (
 	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
 
-	"github.com/iyear/tdl/core/dcpool"
-	"github.com/iyear/tdl/core/storage"
-	tclientcore "github.com/iyear/tdl/core/tclient"
-	"github.com/iyear/tdl/pkg/kv"
-	"github.com/iyear/tdl/pkg/tclient"
+	"github.com/ualinker/tdl/core/dcpool"
+	"github.com/ualinker/tdl/core/storage"
+	tclientcore "github.com/ualinker/tdl/core/tclient"
+	"github.com/ualinker/tdl/pkg/kv"
+	"github.com/ualinker/tdl/pkg/tclient"
 )
 
 //go:embed public_key.pem

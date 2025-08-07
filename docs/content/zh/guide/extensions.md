@@ -8,7 +8,7 @@ weight: 70
 {{< hint warning >}}
 扩展是 tdl 的一项新功能，仍处于实验阶段，CLI 可能会在未来版本中发生变化。
 
-如果你遇到任何问题或有任何建议，请在 GitHub 上[创建 Issue](https://github.com/iyear/tdl/issues/new/choose)。
+如果你遇到任何问题或有任何建议，请在 GitHub 上[创建 Issue](https://github.com/ualinker/tdl/issues/new/choose)。
 {{< /hint >}}
 
 ## 概览
@@ -32,7 +32,7 @@ tdl extension install iyear/tdl-whoami
 tdl whoami
 {{< /command >}}
 
-你可以看到 `tdl-whoami` 扩展的输出。详情请参阅 [tdl-whoami](https://github.com/iyear/tdl-whoami)。
+你可以看到 `tdl-whoami` 扩展的输出。详情请参阅 [tdl-whoami](https://github.com/ualinker/tdl-whoami)。
 ```
 You are XXXXX. ID: XXXXXXXX
 ```
@@ -169,4 +169,4 @@ tdl extension remove --dry-run EXTENSION
 
 ## 开发扩展
 
-请参阅 [tdl-extension-template](https://github.com/iyear/tdl-extension-template) 代码库，了解如何为 tdl 创建、构建和发布扩展。
+请参阅 [tdl-extension-template](https://github.com/ualinker/tdl-extension-template) 代码库，了解如何为 tdl 创建、构建和发布扩展。

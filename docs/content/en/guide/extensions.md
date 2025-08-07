@@ -8,7 +8,7 @@ weight: 70
 {{< hint warning >}}
 Extensions are a new feature in tdl. They are still in the experimental stage, and the CLI may change in future versions.
 
-If you encounter any problems or have any suggestions, please [open an issue](https://github.com/iyear/tdl/issues/new/choose) on GitHub.
+If you encounter any problems or have any suggestions, please [open an issue](https://github.com/ualinker/tdl/issues/new/choose) on GitHub.
 {{< /hint >}}
 
 ## Overview
@@ -32,7 +32,7 @@ tdl extension install iyear/tdl-whoami
 tdl whoami
 {{< /command >}}
 
-You can see the output of the `tdl-whoami` extension. Refer to the [tdl-whoami](https://github.com/iyear/tdl-whoami) for details.
+You can see the output of the `tdl-whoami` extension. Refer to the [tdl-whoami](https://github.com/ualinker/tdl-whoami) for details.
 ```
 You are XXXXX. ID: XXXXXXXX
 ```
@@ -169,4 +169,4 @@ tdl extension remove --dry-run EXTENSION
 
 ## Developing extensions
 
-Please refer to the [tdl-extension-template](https://github.com/iyear/tdl-extension-template) repository for instructions on how to create, build, and publish extensions for tdl.
+Please refer to the [tdl-extension-template](https://github.com/ualinker/tdl-extension-template) repository for instructions on how to create, build, and publish extensions for tdl.

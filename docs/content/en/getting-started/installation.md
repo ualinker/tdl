@@ -222,28 +222,28 @@ go1.21.13 linux/amd64
 
 {{< tabs "prebuilt" >}}
 {{< tab "Windows" >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Windows_64bit.zip" >}}x86_64/amd64{{<
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Windows_64bit.zip" >}}x86_64/amd64{{<
 /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Windows_32bit.zip" >}}x86{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Windows_arm64.zip" >}}arm64{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Windows_armv5.zip" >}}armv5{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Windows_armv6.zip" >}}armv6{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Windows_armv7.zip" >}}armv7{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Windows_32bit.zip" >}}x86{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Windows_arm64.zip" >}}arm64{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Windows_armv5.zip" >}}armv5{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Windows_armv6.zip" >}}armv6{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Windows_armv7.zip" >}}armv7{{< /button >}}
 {{< /tab >}}
 
 {{< tab "macOS" >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_MacOS_64bit.tar.gz" >}}Intel{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_MacOS_arm64.tar.gz" >}}M1/M2{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_MacOS_64bit.tar.gz" >}}Intel{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_MacOS_arm64.tar.gz" >}}M1/M2{{< /button >}}
 {{< /tab >}}
 
 {{< tab "Linux" >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Linux_64bit.tar.gz" >}}x86_64/amd64{{<
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Linux_64bit.tar.gz" >}}x86_64/amd64{{<
 /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Linux_32bit.tar.gz" >}}x86{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Linux_arm64.tar.gz" >}}arm64{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Linux_armv5.tar.gz" >}}armv5{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Linux_armv6.tar.gz" >}}armv6{{< /button >}}
-{{< button href="https://github.com/iyear/tdl/releases/latest/download/tdl_Linux_armv7.tar.gz" >}}armv7{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Linux_32bit.tar.gz" >}}x86{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Linux_arm64.tar.gz" >}}arm64{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Linux_armv5.tar.gz" >}}armv5{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Linux_armv6.tar.gz" >}}armv6{{< /button >}}
+{{< button href="https://github.com/ualinker/tdl/releases/latest/download/tdl_Linux_armv7.tar.gz" >}}armv7{{< /button >}}
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -270,6 +270,6 @@ default `GOPATH` (`$HOME/go` or `%USERPROFILE%\go`).
 Then build:
 
 {{< command >}}
-go install github.com/iyear/tdl@latest
+go install github.com/ualinker/tdl@latest
 tdl version
 {{< /command >}}
