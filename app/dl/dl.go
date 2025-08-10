@@ -23,6 +23,7 @@ import (
 	"github.com/iyear/tdl/pkg/prog"
 	"github.com/iyear/tdl/pkg/tmessage"
 	"github.com/iyear/tdl/pkg/utils"
+	jdbprog "github.com/jedib0t/go-pretty/v6/progress"
 )
 
 type Options struct {
@@ -33,6 +34,7 @@ type Options struct {
 	URLs       []string
 	Files      []string
 	Dialogs    []*tmessage.Dialog
+	Progress   downloader.Progress
 	Include    []string
 	Exclude    []string
 	Desc       bool
@@ -113,15 +115,20 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 		}
 	}()
 
-	dlProgress := prog.New(utils.Byte.FormatBinaryBytes)
-	dlProgress.SetNumTrackersExpected(it.Total())
-	prog.EnablePS(ctx, dlProgress)
+	var dlProgress jdbprog.Writer
+	progress := opts.Progress
+	if opts.Progress == nil {
+		dlProgress = prog.New(utils.Byte.FormatBinaryBytes)
+		dlProgress.SetNumTrackersExpected(it.Total())
+		prog.EnablePS(ctx, dlProgress)
+		progress = newProgress(dlProgress, it, opts)
+	}
 
 	options := downloader.Options{
 		Pool:     pool,
 		Threads:  FlagThreads,
 		Iter:     it,
-		Progress: newProgress(dlProgress, it, opts),
+		Progress: progress,
 	}
 	limit := FlagLimit
 
@@ -134,8 +141,10 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 
 	color.Green("All files will be downloaded to '%s' dir", opts.Dir)
 
-	go dlProgress.Render()
-	defer prog.Wait(ctx, dlProgress)
+	if dlProgress != nil {
+		go dlProgress.Render()
+		defer prog.Wait(ctx, dlProgress)
+	}
 
 	return downloader.New(options).Download(ctx, limit)
 }
