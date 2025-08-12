@@ -1,7 +1,7 @@
 package dl
 
 import (
-	"io"
+	"os"
 
 	"github.com/gotd/td/telegram/peers"
 	"github.com/iyear/tdl/core/downloader"
@@ -21,7 +21,7 @@ type ProgressElem struct {
 	Peer      peers.Peer
 	MessageID int
 	File      downloader.File
-	To        io.WriterAt
+	To        *os.File
 	ID        int
 }
 
