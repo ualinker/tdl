@@ -27,19 +27,19 @@ import (
 )
 
 type Options struct {
-	Dir        string
-	RewriteExt bool
-	SkipSame   bool
-	Template   string
-	URLs       []string
-	Files      []string
-	Dialogs    []*tmessage.Dialog
-	Progress   downloader.Progress
-	Include    []string
-	Exclude    []string
-	Desc       bool
-	Takeout    bool
-	Group      bool // auto detect grouped message
+	Dir             string
+	RewriteExt      bool
+	SkipSame        bool
+	Template        string
+	URLs            []string
+	Files           []string
+	Dialogs         []*tmessage.Dialog
+	ProgressAdapter ProgressAdapter
+	Include         []string
+	Exclude         []string
+	Desc            bool
+	Takeout         bool
+	Group           bool // auto detect grouped message
 
 	// resume opts
 	Continue, Restart bool
@@ -116,8 +116,12 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 	}()
 
 	var dlProgress jdbprog.Writer
-	progress := opts.Progress
-	if opts.Progress == nil {
+	var progress downloader.Progress
+
+	if opts.ProgressAdapter != nil {
+		opts.ProgressAdapter.SetIterator(it)
+		progress = opts.ProgressAdapter
+	} else {
 		dlProgress = prog.New(utils.Byte.FormatBinaryBytes)
 		dlProgress.SetNumTrackersExpected(it.Total())
 		prog.EnablePS(ctx, dlProgress)

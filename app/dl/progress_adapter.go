@@ -1,31 +1,43 @@
 package dl
 
 import (
-	"strings"
+	"io"
 
 	"github.com/gotd/td/telegram/peers"
 	"github.com/iyear/tdl/core/downloader"
 )
 
+type Iterator interface {
+	Finish(id int)
+	Finished() map[int]struct{}
+}
+
+type ProgressAdapter interface {
+	downloader.Progress
+	SetIterator(Iterator)
+}
+
 type ProgressElem struct {
-	From      peers.Peer
+	Peer      peers.Peer
 	MessageID int
-	FileName  string
-	Size      int64
+	To        io.WriterAt
+	ID        int
 }
 
 type ProgressHandler interface {
 	OnAdd(elem ProgressElem)
 	OnDownload(elem ProgressElem, state downloader.ProgressState)
 	OnDone(elem ProgressElem, err error)
+
+	SetIterator(Iterator)
 }
 
 type progressAdapter struct {
 	handler ProgressHandler
 }
 
-func NewProgressAdapter(handler ProgressHandler) downloader.Progress {
-	return &progressAdapter{handler}
+func NewProgressAdapter(handler ProgressHandler) ProgressAdapter {
+	return &progressAdapter{handler: handler}
 }
 
 func (p *progressAdapter) OnAdd(elem downloader.Elem) {
@@ -40,12 +52,16 @@ func (p *progressAdapter) OnDone(elem downloader.Elem, err error) {
 	p.handler.OnDone(p.progressElem(elem), err)
 }
 
+func (p *progressAdapter) SetIterator(iter Iterator) {
+	p.handler.SetIterator(iter)
+}
+
 func (p *progressAdapter) progressElem(elem downloader.Elem) ProgressElem {
 	el := elem.(*iterElem)
 	return ProgressElem{
-		From:      el.from,
+		Peer:      el.from,
 		MessageID: el.fromMsg.ID,
-		FileName:  strings.TrimSuffix(el.to.Name(), tempExt),
-		Size:      el.Size(),
+		To:        el.to,
+		ID:        el.id,
 	}
 }
