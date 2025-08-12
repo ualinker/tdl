@@ -20,6 +20,7 @@ type ProgressAdapter interface {
 type ProgressElem struct {
 	Peer      peers.Peer
 	MessageID int
+	File      downloader.File
 	To        io.WriterAt
 	ID        int
 }
@@ -63,5 +64,6 @@ func (p *progressAdapter) progressElem(elem downloader.Elem) ProgressElem {
 		MessageID: el.fromMsg.ID,
 		To:        el.to,
 		ID:        el.id,
+		File:      el.File(),
 	}
 }
