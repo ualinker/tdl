@@ -10,6 +10,7 @@ import (
 type Iterator interface {
 	Finish(id int)
 	Finished() map[int]struct{}
+	Total() int
 }
 
 type ProgressAdapter interface {
