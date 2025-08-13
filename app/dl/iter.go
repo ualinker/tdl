@@ -248,11 +248,19 @@ func (i *iter) processGrouped(ctx context.Context, message *tg.Message, from pee
 		return false, false
 	}
 
+	var hasRet, hasSkip bool
+
 	for _, msg := range grouped {
-		// best effort, ignore error
-		_, _ = i.processSingle(msg, from)
+		ret, skip := i.processSingle(msg, from)
+		hasRet = hasRet || ret
+		hasSkip = hasSkip || skip
 	}
-	return true, false
+
+	if hasRet {
+		return true, false
+	}
+
+	return false, hasSkip
 }
 
 func (i *iter) Value() downloader.Elem {
