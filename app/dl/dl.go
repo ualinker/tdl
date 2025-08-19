@@ -35,6 +35,8 @@ type Options struct {
 	Files           []string
 	Dialogs         []*tmessage.Dialog
 	ProgressAdapter ProgressAdapter
+	Threads         int
+	Concurrency     int
 	Include         []string
 	Exclude         []string
 	Desc            bool
@@ -128,13 +130,21 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 		progress = newProgress(dlProgress, it, opts)
 	}
 
+	threads := FlagThreads
+	if opts.Threads > 0 {
+		threads = opts.Threads
+	}
+
 	options := downloader.Options{
 		Pool:     pool,
-		Threads:  FlagThreads,
+		Threads:  threads,
 		Iter:     it,
 		Progress: progress,
 	}
 	limit := FlagLimit
+	if opts.Concurrency > 0 {
+		limit = opts.Concurrency
+	}
 
 	logctx.From(ctx).Info("Start download",
 		zap.String("dir", opts.Dir),
