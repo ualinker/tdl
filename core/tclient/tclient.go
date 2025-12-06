@@ -13,13 +13,13 @@ import (
 	"github.com/gotd/td/exchange"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/dcs"
+	"github.com/iyear/tdl/core/util/tutil"
 	"golang.org/x/net/proxy"
 
 	"github.com/iyear/tdl/core/logctx"
 	"github.com/iyear/tdl/core/middlewares/recovery"
 	"github.com/iyear/tdl/core/middlewares/retry"
 	"github.com/iyear/tdl/core/util/netutil"
-	"github.com/iyear/tdl/core/util/tutil"
 )
 
 // dc values can be overridden globally
@@ -38,6 +38,7 @@ type Options struct {
 	NTP              string
 	ReconnectTimeout time.Duration
 	UpdateHandler    telegram.UpdateHandler
+	Device           telegram.DeviceConfig
 }
 
 // New creates new telegram client with given options.
@@ -63,6 +64,13 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 		dialer = d.DialContext
 	}
 
+	var device telegram.DeviceConfig
+	if o.Device == (telegram.DeviceConfig{}) {
+		device = tutil.Device
+	} else {
+		device = o.Device
+	}
+
 	opts := telegram.Options{
 		Resolver: dcs.Plain(dcs.PlainOptions{
 			Dial: dialer,
@@ -74,7 +82,7 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 		DCList:         DCList,
 		PublicKeys:     PublicKeys,
 		UpdateHandler:  o.UpdateHandler,
-		Device:         tutil.Device,
+		Device:         device,
 		SessionStorage: o.Session,
 		RetryInterval:  5 * time.Second,
 		MaxRetries:     5,

@@ -19,6 +19,7 @@ type Options struct {
 	NTP              string
 	ReconnectTimeout time.Duration
 	UpdateHandler    telegram.UpdateHandler
+	Device           telegram.DeviceConfig
 }
 
 func SetApp(kv storage.Storage, name string, app App) error {
@@ -57,5 +58,6 @@ func New(ctx context.Context, o Options, login bool, middlewares ...telegram.Mid
 		NTP:              o.NTP,
 		ReconnectTimeout: o.ReconnectTimeout,
 		UpdateHandler:    o.UpdateHandler,
+		Device:           o.Device,
 	})
 }
