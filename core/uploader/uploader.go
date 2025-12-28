@@ -94,10 +94,13 @@ func (u *Uploader) upload(ctx context.Context, elem Elem) error {
 		return errors.Wrap(err, "detect mime")
 	}
 
-	caption := []message.StyledTextOption{
-		styling.Code(elem.File().Name()),
-		styling.Plain(" - "),
-		styling.Code(mime.String()),
+	caption := elem.Caption()
+	if len(caption) == 0 {
+		caption = []message.StyledTextOption{
+			styling.Code(elem.File().Name()),
+			styling.Plain(" - "),
+			styling.Code(mime.String()),
+		}
 	}
 	doc := message.UploadedDocument(f, caption...).
 		MIME(mime.String()).
@@ -139,6 +142,7 @@ func (u *Uploader) upload(ctx context.Context, elem Elem) error {
 	_, err = message.NewSender(u.opts.Client).
 		WithUploader(up).
 		To(elem.To()).
+		Reply(elem.Thread()).
 		Media(ctx, media)
 	if err != nil {
 		return errors.Wrap(err, "send message")

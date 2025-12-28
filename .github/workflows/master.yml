@@ -2,12 +2,12 @@ name: master builder
 
 on:
   pull_request:
-    types: [ opened, synchronize, reopened, labeled, unlabeled]
-    branches: [ master ]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches: [master]
   push:
-    branches: [ master ]
+    branches: [master]
     paths-ignore:
-      - 'docs/**'
+      - "docs/**"
 
 permissions:
   contents: read
@@ -25,24 +25,24 @@ jobs:
           - extension
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Golang env
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: false # conflict with golangci-lint cache
       - name: lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64.7
+          version: v2.6.0
           working-directory: ${{ matrix.directory }}
   unit-test:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Golang env
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
@@ -54,9 +54,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Golang env
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
