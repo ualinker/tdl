@@ -175,7 +175,7 @@ func (i *iter) processSingle(message *tg.Message, from peers.Peer) (bool, bool) 
 	item, ok := tmedia.GetMedia(message)
 	if !ok {
 		i.err = errors.Errorf("can not get media from %d/%d message", from.ID(), message.ID)
-		return false, false
+		return false, true
 	}
 
 	// process include and exclude
