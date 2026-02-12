@@ -16,7 +16,9 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/gotd/td/telegram/peers"
 	"github.com/gotd/td/tg"
+	"github.com/iyear/tdl/core/logctx"
 	"go.uber.org/atomic"
+	"go.uber.org/zap"
 
 	"github.com/iyear/tdl/core/dcpool"
 	"github.com/iyear/tdl/core/downloader"
@@ -168,13 +170,13 @@ func (i *iter) process(ctx context.Context) (ret bool, skip bool) {
 	if _, ok := message.GetGroupedID(); ok && i.opts.Group {
 		return i.processGrouped(ctx, message, from)
 	}
-	return i.processSingle(message, from)
+	return i.processSingle(ctx, message, from)
 }
 
-func (i *iter) processSingle(message *tg.Message, from peers.Peer) (bool, bool) {
+func (i *iter) processSingle(ctx context.Context, message *tg.Message, from peers.Peer) (bool, bool) {
 	item, ok := tmedia.GetMedia(message)
 	if !ok {
-		i.err = errors.Errorf("can not get media from %d/%d message", from.ID(), message.ID)
+		logctx.From(ctx).Error("can not get media", zap.Int64("from_id", from.ID()), zap.Int("message_id", message.ID))
 		return false, true
 	}
 
@@ -251,7 +253,7 @@ func (i *iter) processGrouped(ctx context.Context, message *tg.Message, from pee
 	var hasRet, hasSkip bool
 
 	for _, msg := range grouped {
-		ret, skip := i.processSingle(msg, from)
+		ret, skip := i.processSingle(ctx, msg, from)
 		hasRet = hasRet || ret
 		hasSkip = hasSkip || skip
 	}
