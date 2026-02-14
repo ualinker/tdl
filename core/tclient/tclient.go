@@ -71,6 +71,14 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 		device = o.Device
 	}
 
+	var middlewares []telegram.Middleware
+
+	if o.Middlewares == nil {
+		middlewares = NewDefaultMiddlewares(ctx, o.ReconnectTimeout)
+	} else {
+		middlewares = o.Middlewares
+	}
+
 	opts := telegram.Options{
 		Resolver: dcs.Plain(dcs.PlainOptions{
 			Dial: dialer,
@@ -87,7 +95,7 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 		RetryInterval:  5 * time.Second,
 		MaxRetries:     5,
 		DialTimeout:    10 * time.Second,
-		Middlewares:    append(NewDefaultMiddlewares(ctx, o.ReconnectTimeout), o.Middlewares...),
+		Middlewares:    middlewares,
 		Clock:          tclock,
 		Logger:         logctx.From(ctx).Named("td"),
 	}
