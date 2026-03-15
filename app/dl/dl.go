@@ -35,6 +35,7 @@ type Options struct {
 	Files           []string
 	Dialogs         []*tmessage.Dialog
 	ProgressAdapter ProgressAdapter
+	PeersManager    *peers.Manager
 	Threads         int
 	Concurrency     int
 	Include         []string
@@ -93,7 +94,12 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 		return serve(ctx, kvd, pool, dialogs, opts.Port, opts.Takeout)
 	}
 
-	manager := peers.Options{Storage: storage.NewPeers(kvd)}.Build(pool.Default(ctx))
+	var manager *peers.Manager
+	if opts.PeersManager != nil {
+		manager = opts.PeersManager
+	} else {
+		manager = peers.Options{Storage: storage.NewPeers(kvd)}.Build(pool.Default(ctx))
+	}
 
 	it, err := newIter(pool, manager, dialogs, opts, FlagDelay)
 	if err != nil {
@@ -109,7 +115,7 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 		color.Yellow("Restart download by 'restart' flag")
 	}
 
-	defer func() { // save progress
+	defer func() {       // save progress
 		if rerr != nil { // download is interrupted
 			multierr.AppendInto(&rerr, saveProgress(ctx, kvd, it))
 		} else { // if finished, we should clear resume key
