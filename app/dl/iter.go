@@ -163,7 +163,9 @@ func (i *iter) process(ctx context.Context) (ret bool, skip bool) {
 	}
 	switch peer.(type) {
 	case *tg.InputPeerSelf:
-		peer = from.InputPeer()
+		peer = &tg.InputPeerUser{
+			UserID: from.ID(),
+		}
 	}
 	message, err := tutil.GetSingleMessage(ctx, i.pool.Default(ctx), peer, msg)
 	if err != nil {
