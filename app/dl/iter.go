@@ -161,12 +161,6 @@ func (i *iter) process(ctx context.Context) (ret bool, skip bool) {
 		i.err = errors.Wrap(err, "resolve from input peer")
 		return false, false
 	}
-	switch peer.(type) {
-	case *tg.InputPeerSelf:
-		peer = &tg.InputPeerUser{
-			UserID: from.ID(),
-		}
-	}
 	message, err := tutil.GetSingleMessage(ctx, i.pool.Default(ctx), peer, msg)
 	if err != nil {
 		i.err = errors.Wrap(err, "resolve message")
