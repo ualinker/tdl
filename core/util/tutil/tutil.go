@@ -10,6 +10,7 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/gotd/td/telegram/peers"
 	"github.com/gotd/td/telegram/query"
+	"github.com/gotd/td/telegram/query/messages"
 	"github.com/gotd/td/tg"
 )
 
@@ -172,9 +173,18 @@ func FileExists(msg tg.MessageClass) bool {
 }
 
 func GetSingleMessage(ctx context.Context, c *tg.Client, peer tg.InputPeerClass, msg int) (*tg.Message, error) {
-	it := query.Messages(c).
-		GetHistory(peer).OffsetID(msg + 1).
-		BatchSize(1).Iter()
+	var it *messages.Iterator
+
+	switch peer.(type) {
+	case *tg.InputPeerSelf:
+		it = query.Messages(c).
+			GetSavedHistory(peer).OffsetID(msg + 1).
+			BatchSize(1).Iter()
+	default:
+		it = query.Messages(c).
+			GetHistory(peer).OffsetID(msg + 1).
+			BatchSize(1).Iter()
+	}
 
 	if !it.Next(ctx) {
 		return nil, errors.Wrap(it.Err(), "get single message")
