@@ -163,8 +163,8 @@ func (i *iter) process(ctx context.Context) (ret bool, skip bool) {
 	}
 	message, err := tutil.GetSingleMessage(ctx, i.pool.Default(ctx), peer, msg)
 	if err != nil {
-		i.err = errors.Wrap(err, "resolve message")
-		return false, false
+		logctx.From(ctx).Error("unable to resolve message", zap.String("peer", peer.String()), zap.Int("message_id", msg))
+		return false, true
 	}
 
 	if _, ok := message.GetGroupedID(); ok && i.opts.Group {
