@@ -3,12 +3,10 @@ package dl
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/binary"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
-	"sort"
 	"sync"
 	"text/template"
 	"time"
@@ -25,7 +23,6 @@ import (
 	"github.com/iyear/tdl/core/tmedia"
 	"github.com/iyear/tdl/core/util/fsutil"
 	"github.com/iyear/tdl/core/util/tutil"
-	"github.com/iyear/tdl/pkg/tmessage"
 	"github.com/iyear/tdl/pkg/tplfunc"
 	"github.com/iyear/tdl/pkg/utils"
 )
@@ -43,26 +40,33 @@ type fileTemplate struct {
 }
 
 type iter struct {
-	pool    dcpool.Pool
-	manager *peers.Manager
-	dialogs []*tmessage.Dialog
-	tpl     *template.Template
-	include map[string]struct{}
-	exclude map[string]struct{}
-	opts    Options
-	delay   time.Duration
+	pool     dcpool.Pool
+	manager  *peers.Manager
+	messages MessagesIterator
+	tpl      *template.Template
+	include  map[string]struct{}
+	exclude  map[string]struct{}
+	opts     Options
+	delay    time.Duration
 
 	mu          *sync.Mutex
 	finished    map[int]struct{}
 	fingerprint string
-	preSum      []int
 	i, j        int
 	counter     *atomic.Int64
 	elem        chan downloader.Elem
 	err         error
 }
 
-func newIter(pool dcpool.Pool, manager *peers.Manager, dialog [][]*tmessage.Dialog,
+type MessagesIterator interface {
+	Total() int
+	Next() (bool, error)
+	Peer() tg.InputPeerClass
+	MessageID() int
+	Reset()
+}
+
+func newIter(pool dcpool.Pool, manager *peers.Manager, messages MessagesIterator,
 	opts Options, delay time.Duration,
 ) (*iter, error) {
 	tpl, err := template.New("dl").
@@ -72,9 +76,12 @@ func newIter(pool dcpool.Pool, manager *peers.Manager, dialog [][]*tmessage.Dial
 		return nil, errors.Wrap(err, "parse template")
 	}
 
-	dialogs := flatDialogs(dialog)
+	if messages == nil {
+		return nil, errors.Errorf("empty MessagesIterator")
+	}
+
 	// if msgs is empty, return error to avoid range out of index
-	if len(dialogs) == 0 {
+	if messages.Total() == 0 {
 		return nil, errors.Errorf("you must specify at least one message")
 	}
 
@@ -82,23 +89,19 @@ func newIter(pool dcpool.Pool, manager *peers.Manager, dialog [][]*tmessage.Dial
 	includeMap := filterMap(opts.Include, fsutil.AddPrefixDot)
 	excludeMap := filterMap(opts.Exclude, fsutil.AddPrefixDot)
 
-	// to keep fingerprint stable
-	sortDialogs(dialogs, opts.Desc)
-
 	return &iter{
-		pool:    pool,
-		manager: manager,
-		dialogs: dialogs,
-		opts:    opts,
-		include: includeMap,
-		exclude: excludeMap,
-		tpl:     tpl,
-		delay:   delay,
+		pool:     pool,
+		manager:  manager,
+		messages: messages,
+		opts:     opts,
+		include:  includeMap,
+		exclude:  excludeMap,
+		tpl:      tpl,
+		delay:    delay,
 
 		mu:          &sync.Mutex{},
 		finished:    make(map[int]struct{}),
-		fingerprint: fingerprint(dialogs),
-		preSum:      preSum(dialogs),
+		fingerprint: "",
 		i:           0,
 		j:           0,
 		counter:     atomic.NewInt64(-1),
@@ -137,24 +140,16 @@ func (i *iter) process(ctx context.Context) (ret bool, skip bool) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 
-	defer func() {
-		if i.j++; i.i < len(i.dialogs) && i.j >= len(i.dialogs[i.i].Messages) {
-			i.i++
-			i.j = 0
-		}
-	}()
-
 	// end of iteration or error occurred
-	if i.i >= len(i.dialogs) || i.j >= len(i.dialogs[i.i].Messages) || i.err != nil {
+	next, err := i.messages.Next()
+	if err != nil {
+		i.err = err
+	}
+	if !next || i.err != nil {
 		return false, false
 	}
 
-	peer, msg := i.dialogs[i.i].Peer, i.dialogs[i.i].Messages[i.j]
-
-	// check if finished
-	if _, ok := i.finished[i.ij2n(i.i, i.j)]; ok {
-		return false, true
-	}
+	peer, msg := i.messages.Peer(), i.messages.MessageID()
 
 	from, err := i.manager.FromInputPeer(ctx, peer)
 	if err != nil {
@@ -208,6 +203,7 @@ func (i *iter) processSingle(ctx context.Context, message *tg.Message, from peer
 		if stat, err := os.Stat(filepath.Join(i.opts.Dir, toName.String())); err == nil {
 			if fsutil.GetNameWithoutExt(toName.String()) == fsutil.GetNameWithoutExt(stat.Name()) &&
 				stat.Size() == item.Size {
+				slog.Info("dl/iter: already exists", "name", toName.String())
 				return false, true
 			}
 		}
@@ -273,11 +269,11 @@ func (i *iter) Err() error {
 	return i.err
 }
 
-func (i *iter) SetFinished(finished map[int]struct{}) {
+func (i *iter) Total() int {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 
-	i.finished = finished
+	return i.messages.Total()
 }
 
 func (i *iter) Finished() map[int]struct{} {
@@ -287,41 +283,11 @@ func (i *iter) Finished() map[int]struct{} {
 	return i.finished
 }
 
-func (i *iter) Fingerprint() string {
-	return i.fingerprint
-}
-
 func (i *iter) Finish(id int) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 
 	i.finished[id] = struct{}{}
-}
-
-func (i *iter) Total() int {
-	i.mu.Lock()
-	defer i.mu.Unlock()
-
-	total := 0
-	for _, m := range i.dialogs {
-		total += len(m.Messages)
-	}
-	return total
-}
-
-func (i *iter) ij2n(ii, jj int) int {
-	return i.preSum[ii] + jj
-}
-
-func flatDialogs(dialogs [][]*tmessage.Dialog) []*tmessage.Dialog {
-	res := make([]*tmessage.Dialog, 0)
-	for _, d := range dialogs {
-		if len(d) == 0 {
-			continue
-		}
-		res = append(res, d...)
-	}
-	return res
 }
 
 func filterMap(data []string, keyFn func(key string) string) map[string]struct{} {
@@ -330,44 +296,4 @@ func filterMap(data []string, keyFn func(key string) string) map[string]struct{}
 		m[keyFn(v)] = struct{}{}
 	}
 	return m
-}
-
-func sortDialogs(dialogs []*tmessage.Dialog, desc bool) {
-	sort.Slice(dialogs, func(i, j int) bool {
-		return tutil.GetInputPeerID(dialogs[i].Peer) <
-			tutil.GetInputPeerID(dialogs[j].Peer) // increasing order
-	})
-
-	for _, m := range dialogs {
-		sort.Slice(m.Messages, func(i, j int) bool {
-			if desc {
-				return m.Messages[i] > m.Messages[j]
-			}
-			return m.Messages[i] < m.Messages[j]
-		})
-	}
-}
-
-// preSum of dialogs
-func preSum(dialogs []*tmessage.Dialog) []int {
-	sum := make([]int, len(dialogs)+1)
-	for i, m := range dialogs {
-		sum[i+1] = sum[i] + len(m.Messages)
-	}
-	return sum
-}
-
-func fingerprint(dialogs []*tmessage.Dialog) string {
-	endian := binary.BigEndian
-	buf, b := &bytes.Buffer{}, make([]byte, 8)
-	for _, m := range dialogs {
-		endian.PutUint64(b, uint64(tutil.GetInputPeerID(m.Peer)))
-		buf.Write(b)
-		for _, msg := range m.Messages {
-			endian.PutUint64(b, uint64(msg))
-			buf.Write(b)
-		}
-	}
-
-	return fmt.Sprintf("%x", sha256.Sum256(buf.Bytes()))
 }
