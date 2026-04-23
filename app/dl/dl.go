@@ -36,6 +36,7 @@ type Options struct {
 	Desc            bool
 	Takeout         bool
 	Group           bool // auto detect grouped message
+	DryRun          bool
 
 	// resume opts
 	Continue, Restart bool
@@ -94,6 +95,7 @@ func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Opti
 		Threads:  threads,
 		Iter:     it,
 		Progress: progress,
+		DryRun:   opts.DryRun,
 	}
 	limit := FlagLimit
 	if opts.Concurrency > 0 {

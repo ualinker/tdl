@@ -212,16 +212,22 @@ func (i *iter) processSingle(ctx context.Context, message *tg.Message, from peer
 	filename := fmt.Sprintf("%s%s", toName.String(), tempExt)
 	path := filepath.Join(i.opts.Dir, filename)
 
-	// #113. If path contains dirs, create it. So now we support nested dirs.
-	if err = os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		i.err = errors.Wrap(err, "create dir")
-		return false, false
-	}
+	var to *os.File
 
-	to, err := os.Create(path)
-	if err != nil {
-		i.err = errors.Wrap(err, "create file")
-		return false, false
+	if !i.opts.DryRun {
+		// #113. If path contains dirs, create it. So now we support nested dirs.
+		if err = os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			i.err = errors.Wrap(err, "create dir")
+			return false, false
+		}
+
+		to, err = os.Create(path)
+		if err != nil {
+			i.err = errors.Wrap(err, "create file")
+			return false, false
+		}
+	} else {
+		to, _ = os.Open(os.DevNull)
 	}
 
 	i.elem <- &iterElem{
