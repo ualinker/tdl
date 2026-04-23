@@ -25,6 +25,7 @@ type Options struct {
 	Threads  int
 	Iter     Iter
 	Progress Progress
+	DryRun   bool
 }
 
 func New(opts Options) *Downloader {
@@ -73,6 +74,10 @@ func (d *Downloader) download(ctx context.Context, elem Elem) error {
 
 	logctx.From(ctx).Debug("Start download elem",
 		zap.Any("elem", elem))
+
+	if d.opts.DryRun {
+		return nil
+	}
 
 	client := d.opts.Pool.Client(ctx, elem.File().DC())
 	if elem.AsTakeout() {
