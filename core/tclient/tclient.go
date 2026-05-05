@@ -13,13 +13,11 @@ import (
 	"github.com/gotd/td/exchange"
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/dcs"
-	"github.com/iyear/tdl/core/util/tutil"
-	"golang.org/x/net/proxy"
-
 	"github.com/iyear/tdl/core/logctx"
 	"github.com/iyear/tdl/core/middlewares/recovery"
 	"github.com/iyear/tdl/core/middlewares/retry"
 	"github.com/iyear/tdl/core/util/netutil"
+	"github.com/iyear/tdl/core/util/tutil"
 )
 
 // dc values can be overridden globally
@@ -39,6 +37,7 @@ type Options struct {
 	ReconnectTimeout time.Duration
 	UpdateHandler    telegram.UpdateHandler
 	Device           telegram.DeviceConfig
+	OnDead           func()
 }
 
 // New creates new telegram client with given options.
@@ -54,14 +53,9 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 		}
 	}
 
-	// process proxy
-	var dialer dcs.DialFunc = proxy.Direct.DialContext
-	if p := o.Proxy; p != "" {
-		d, err := netutil.NewProxy(p)
-		if err != nil {
-			return nil, errors.Wrap(err, "get dialer")
-		}
-		dialer = d.DialContext
+	resolver, err := netutil.NewResolver(o.Proxy)
+	if err != nil {
+		return nil, errors.Wrap(err, "create resolver")
 	}
 
 	var device telegram.DeviceConfig
@@ -80,9 +74,7 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 	}
 
 	opts := telegram.Options{
-		Resolver: dcs.Plain(dcs.PlainOptions{
-			Dial: dialer,
-		}),
+		Resolver: resolver,
 		ReconnectionBackoff: func() backoff.BackOff {
 			return newBackoff(o.ReconnectTimeout)
 		},
@@ -98,6 +90,7 @@ func New(ctx context.Context, o Options) (*telegram.Client, error) {
 		Middlewares:    middlewares,
 		Clock:          tclock,
 		Logger:         logctx.From(ctx).Named("td"),
+		OnDead:         o.OnDead,
 	}
 
 	return telegram.NewClient(o.AppID, o.AppHash, opts), nil
