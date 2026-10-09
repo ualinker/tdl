@@ -6,6 +6,7 @@ import (
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/peers"
+	"github.com/iyear/tdl/core/tclient"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/iyear/tdl/core/downloader"
 	"github.com/iyear/tdl/core/logctx"
 	"github.com/iyear/tdl/core/storage"
-	"github.com/iyear/tdl/core/tclient"
 	"github.com/iyear/tdl/pkg/prog"
 	"github.com/iyear/tdl/pkg/utils"
 	jdbprog "github.com/jedib0t/go-pretty/v6/progress"
@@ -37,6 +37,7 @@ type Options struct {
 	Takeout         bool
 	Group           bool // auto detect grouped message
 	DryRun          bool
+	Pool            dcpool.Pool
 
 	// resume opts
 	Continue, Restart bool
@@ -55,10 +56,15 @@ const (
 )
 
 func Run(ctx context.Context, c *telegram.Client, kvd storage.Storage, opts Options) (rerr error) {
-	pool := dcpool.NewPool(c,
-		int64(FlagPoolSize),
-		tclient.NewDefaultMiddlewares(ctx, FlagReconnectTimeout)...)
-	defer multierr.AppendInvoke(&rerr, multierr.Close(pool))
+	var pool dcpool.Pool
+	if opts.Pool == nil {
+		pool = dcpool.NewPool(c,
+			int64(FlagPoolSize),
+			tclient.NewDefaultMiddlewares(ctx, FlagReconnectTimeout)...)
+		defer multierr.AppendInvoke(&rerr, multierr.Close(pool))
+	} else {
+		pool = opts.Pool
+	}
 
 	var manager *peers.Manager
 	if opts.PeersManager != nil {
